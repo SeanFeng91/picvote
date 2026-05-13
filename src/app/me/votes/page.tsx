@@ -5,8 +5,8 @@ import { formatDate } from "@/lib/format";
 import { requireUserPage } from "@/lib/guards";
 import { listVotesForUser } from "@/lib/store";
 
-export default function MyVotesPage() {
-  const user = requireUserPage("/me/votes");
+export default async function MyVotesPage() {
+  const user = await requireUserPage("/me/votes");
   const votes = listVotesForUser(user.id);
 
   return (

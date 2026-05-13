@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "antd";
+import { LogoutOutlined } from "@ant-design/icons";
 
 export function LogoutButton({ redirectTo = "/login" }: { redirectTo?: string }) {
   const router = useRouter();
@@ -15,8 +17,8 @@ export function LogoutButton({ redirectTo = "/login" }: { redirectTo?: string })
   }
 
   return (
-    <button className="button-secondary" onClick={handleLogout} disabled={pending}>
-      {pending ? "退出中..." : "退出"}
-    </button>
+    <Button icon={<LogoutOutlined />} onClick={handleLogout} loading={pending}>
+      退出
+    </Button>
   );
 }

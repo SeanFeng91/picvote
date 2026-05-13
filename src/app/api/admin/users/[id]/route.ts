@@ -11,14 +11,15 @@ const patchSchema = z.object({
   voteQuota: z.number().int().nullable().optional()
 });
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  const user = getCurrentUser();
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const user = await getCurrentUser();
   if (!user || user.role !== "admin") {
     return NextResponse.json({ error: "没有权限" }, { status: 403 });
   }
   try {
     const payload = patchSchema.parse(await request.json());
-    const updated = updateUserConfig(params.id, payload);
+    const updated = updateUserConfig(id, payload);
     return NextResponse.json({ ok: true, user: updated });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "更新失败" }, { status: 400 });

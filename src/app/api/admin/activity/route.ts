@@ -11,7 +11,7 @@ const schema = z.object({
 });
 
 export async function PATCH(request: Request) {
-  const user = getCurrentUser();
+  const user = await getCurrentUser();
   if (!user || user.role !== "admin") {
     return NextResponse.json({ error: "没有权限" }, { status: 403 });
   }

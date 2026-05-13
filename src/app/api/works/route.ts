@@ -5,12 +5,14 @@ import { createWork, listWorks, remainingVotesForUser } from "@/lib/store";
 import { saveUploadedFile } from "@/lib/storage";
 import { validateUploadFile } from "@/lib/upload-limits";
 
+export const runtime = "nodejs";
+
 function inferMediaType(file: File) {
   return file.type.startsWith("video/") ? "video" : "image";
 }
 
 export async function GET() {
-  const user = getCurrentUser();
+  const user = await getCurrentUser();
   return NextResponse.json({
     works: listWorks(false),
     remainingVotes: user ? remainingVotesForUser(user.id) : null
@@ -18,7 +20,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const user = getCurrentUser();
+  const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "未登录" }, { status: 401 });
   }

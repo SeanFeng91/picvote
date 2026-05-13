@@ -3,8 +3,8 @@ import { UploadForm } from "@/components/upload-form";
 import { requireUserPage } from "@/lib/guards";
 import { getWorkForUser } from "@/lib/store";
 
-export default function UploadPage() {
-  const user = requireUserPage("/upload");
+export default async function UploadPage() {
+  const user = await requireUserPage("/upload");
   return (
     <div className="page-shell stack">
       <div className="topbar">

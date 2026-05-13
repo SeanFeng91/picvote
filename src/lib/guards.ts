@@ -2,16 +2,16 @@ import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
 
-export function requireUserPage(returnTo: string) {
-  const user = getCurrentUser();
+export async function requireUserPage(returnTo: string) {
+  const user = await getCurrentUser();
   if (!user) {
     redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
   return user;
 }
 
-export function requireAdminPage(returnTo: string) {
-  const user = getCurrentUser();
+export async function requireAdminPage(returnTo: string) {
+  const user = await getCurrentUser();
   if (!user) {
     redirect(`/admin/login?returnTo=${encodeURIComponent(returnTo)}`);
   }

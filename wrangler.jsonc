@@ -1,0 +1,45 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "vivopicvote",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2026-05-13",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"vars": {
+		"VIVOPICVOTE_DATA_PROVIDER": "d1",
+		"VIVOPICVOTE_STORAGE_PROVIDER": "r2"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "vivopicvote-db",
+			"database_id": "replace-with-d1-database-id",
+			"migrations_dir": "migrations"
+		},
+		{
+			"binding": "vivopicvote_db",
+			"database_name": "vivopicvote-db",
+			"database_id": "e0e6e046-76b6-4eb1-959f-86a5e34b3eeb",
+			"remote": true
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA_BUCKET",
+			"bucket_name": "vivopicvote-media"
+		},
+		{
+			"bucket_name": "vivopicvote-media",
+			"binding": "vivopicvote_media",
+			"remote": true
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}

@@ -1,10 +1,11 @@
 import { GalleryClient } from "@/components/gallery-client";
 import { LogoutButton } from "@/components/logout-button";
 import { requireUserPage } from "@/lib/guards";
-import { listWorks, remainingVotesForUser } from "@/lib/store";
+import { getWorkForUser, listVotesForUser, listWorks, remainingVotesForUser } from "@/lib/store";
 
-export default function GalleryPage() {
-  const user = requireUserPage("/gallery");
+export default async function GalleryPage() {
+  const user = await requireUserPage("/gallery");
+  const votes = listVotesForUser(user.id);
   return (
     <div className="page-shell stack">
       <div className="topbar">
@@ -18,6 +19,8 @@ export default function GalleryPage() {
         initialWorks={listWorks(false)}
         initialRemainingVotes={remainingVotesForUser(user.id)}
         canVote={user.canVote}
+        currentWork={getWorkForUser(user.id)}
+        votedWorkIds={votes.filter((vote) => vote.status === "valid").map((vote) => vote.workId)}
       />
     </div>
   );

@@ -1,9 +1,10 @@
 "use client";
 
+import { CopyOutlined, TrophyOutlined } from "@ant-design/icons";
+import { App, Button, Card, Image, InputNumber, Space, Statistic, Tag, Typography } from "antd";
 import { useState, useTransition } from "react";
 
 import { Work } from "@/lib/types";
-import { VoteStepper } from "@/components/vote-stepper";
 
 type WorkDetailClientProps = {
   work: Work;
@@ -13,18 +14,18 @@ type WorkDetailClientProps = {
 };
 
 export function WorkDetailClient({ work, remainingVotes: startingVotes, canVote, isOwner }: WorkDetailClientProps) {
+  const { message } = App.useApp();
   const [currentWork, setCurrentWork] = useState(work);
   const [count, setCount] = useState(1);
   const [remainingVotes, setRemainingVotes] = useState(startingVotes);
-  const [message, setMessage] = useState("");
   const [pending, startVoteTransition] = useTransition();
 
   async function handleVote() {
-    if (!canVote) {
+    if (!canVote || remainingVotes < count) {
+      message.warning("剩余票数不足或当前账号不可投票");
       return;
     }
     startVoteTransition(async () => {
-      setMessage("");
       const response = await fetch("/api/votes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -32,61 +33,83 @@ export function WorkDetailClient({ work, remainingVotes: startingVotes, canVote,
       });
       const payload = await response.json();
       if (!response.ok) {
-        setMessage(payload.error || "投票失败");
+        message.error(payload.error || "投票失败");
         return;
       }
       setCurrentWork(payload.work);
       setRemainingVotes(payload.remainingVotes);
       setCount(1);
-      setMessage(`成功投出 ${count} 票，剩余 ${payload.remainingVotes} 票`);
+      message.success(`成功投出 ${count} 票，剩余 ${payload.remainingVotes} 票`);
     });
   }
 
   async function copyShareLink() {
     const shareUrl = `${window.location.origin}${currentWork.sharePath}`;
     await navigator.clipboard.writeText(shareUrl);
-    setMessage("分享页链接已复制");
+    message.success("分享页链接已复制");
   }
 
   return (
-    <div className="layout-main">
-      <div className="panel stack hero-panel">
-        {currentWork.mediaType === "image" ? (
-          <img className="work-media" src={currentWork.previewUrl} alt={currentWork.title} />
-        ) : (
-          <video className="work-media" src={currentWork.mediaUrl} controls playsInline />
-        )}
-      </div>
-      <div className="panel stack hero-panel">
-        <div className="work-code">{currentWork.code}</div>
-        <h1 style={{ margin: 0, fontSize: "clamp(28px, 4vw, 42px)" }}>{currentWork.title}</h1>
-        <div className="subtle">上传人工号 {currentWork.ownerEmployeeNo} · {currentWork.ownerDisplayName}</div>
-        <div className="grid stats-grid">
-          <div className="card">
-            <div className="hint">当前票数</div>
-            <div className="metric">{currentWork.voteCountCache}</div>
-          </div>
-          <div className="card">
-            <div className="hint">剩余票数</div>
-            <div className="metric">{remainingVotes}</div>
-          </div>
+    <div className="photo-workbench">
+      <Card styles={{ body: { padding: 0 } }}>
+        <div className="detail-media-shell">
+          {currentWork.mediaType === "image" ? (
+            <Image
+              src={currentWork.previewUrl}
+              alt={currentWork.title}
+              style={{ width: "100%", maxHeight: "min(76vh, 760px)", objectFit: "contain" }}
+            />
+          ) : (
+            <video className="detail-media" src={currentWork.mediaUrl} controls playsInline />
+          )}
         </div>
-        <div className="stack">
-          <strong>投票</strong>
-          <VoteStepper value={count} max={Math.max(1, remainingVotes)} onChange={setCount} />
-          <button className="button" onClick={handleVote} disabled={!canVote || remainingVotes < 1 || pending}>
-            {pending ? "投票中..." : `确认投 ${count} 票`}
-          </button>
-          <div className="hint">默认 1 票，可通过上下箭头调整票数。</div>
-        </div>
-        <div className="row">
-          <button className="button-secondary" type="button" onClick={copyShareLink}>
+      </Card>
+      <Card>
+        <Space direction="vertical" size={16} style={{ width: "100%" }}>
+          <Space wrap>
+            <Tag color="blue">{currentWork.code}</Tag>
+            <Tag>{currentWork.mediaType === "video" ? "视频" : "图片"}</Tag>
+            {isOwner ? <Tag color="green">我的作品</Tag> : null}
+          </Space>
+          <div>
+            <Typography.Title level={2} style={{ margin: 0 }}>
+              {currentWork.title}
+            </Typography.Title>
+          </div>
+          <div className="stats-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            <Card size="small">
+              <Statistic title="当前票数" value={currentWork.voteCountCache} suffix="票" />
+            </Card>
+            <Card size="small">
+              <Statistic title="我的剩余" value={remainingVotes} suffix="票" />
+            </Card>
+          </div>
+          <Space direction="vertical" size={8}>
+            <Typography.Text strong>投票数量</Typography.Text>
+            <InputNumber
+              min={1}
+              max={Math.max(1, remainingVotes)}
+              value={count}
+              onChange={(value) => setCount(Number(value || 1))}
+              disabled={!canVote || remainingVotes < 1}
+              style={{ width: 160 }}
+              addonAfter="票"
+            />
+            <Button
+              type="primary"
+              icon={<TrophyOutlined />}
+              loading={pending}
+              disabled={!canVote || remainingVotes < 1}
+              onClick={handleVote}
+            >
+              确认投票
+            </Button>
+          </Space>
+          <Button icon={<CopyOutlined />} onClick={copyShareLink}>
             复制分享页链接
-          </button>
-          {isOwner ? <span className="badge">这是你的作品</span> : null}
-        </div>
-        {message ? <div className="success">{message}</div> : null}
-      </div>
+          </Button>
+        </Space>
+      </Card>
     </div>
   );
 }

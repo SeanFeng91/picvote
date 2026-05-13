@@ -1,5 +1,28 @@
 "use client";
 
+import {
+  App,
+  Badge,
+  Button,
+  Card,
+  Empty,
+  Image,
+  Input,
+  Segmented,
+  Space,
+  Statistic,
+  Tag,
+  Typography
+} from "antd";
+import {
+  CameraOutlined,
+  HomeOutlined,
+  PictureOutlined,
+  SearchOutlined,
+  TrophyOutlined,
+  UploadOutlined,
+  UserOutlined
+} from "@ant-design/icons";
 import Link from "next/link";
 import { startTransition, useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
 
@@ -9,14 +32,28 @@ type GalleryClientProps = {
   initialWorks: Work[];
   initialRemainingVotes: number;
   canVote: boolean;
+  currentWork?: Work | null;
+  votedWorkIds?: string[];
+  compactHome?: boolean;
 };
 
-export function GalleryClient({ initialWorks, initialRemainingVotes, canVote }: GalleryClientProps) {
+type Filter = "all" | "image" | "video" | "voted";
+
+export function GalleryClient({
+  initialWorks,
+  initialRemainingVotes,
+  canVote,
+  currentWork,
+  votedWorkIds = [],
+  compactHome = false
+}: GalleryClientProps) {
+  const { message } = App.useApp();
   const [works, setWorks] = useState(initialWorks);
   const [remainingVotes, setRemainingVotes] = useState(initialRemainingVotes);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "image" | "video">("all");
-  const [message, setMessage] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [selectedId, setSelectedId] = useState(initialWorks[0]?.id ?? "");
+  const [votedIds, setVotedIds] = useState(() => new Set(votedWorkIds));
   const [pending, startVoteTransition] = useTransition();
   const deferredSearch = useDeferredValue(search);
 
@@ -37,114 +74,245 @@ export function GalleryClient({ initialWorks, initialRemainingVotes, canVote }: 
     return () => window.clearInterval(timer);
   }, []);
 
+  const votedIdSet = useMemo(() => votedIds, [votedIds]);
   const filteredWorks = useMemo(() => {
+    const keyword = deferredSearch.trim().toLowerCase();
     return works.filter((work) => {
       const matchesSearch =
-        !deferredSearch ||
-        `${work.code} ${work.title} ${work.ownerEmployeeNo} ${work.ownerDisplayName}`
-          .toLowerCase()
-          .includes(deferredSearch.toLowerCase());
-      const matchesFilter = filter === "all" || work.mediaType === filter;
+        !keyword ||
+        `${work.code} ${work.title}`.toLowerCase().includes(keyword);
+      const matchesFilter =
+        filter === "all" ||
+        work.mediaType === filter ||
+        (filter === "voted" && votedIdSet.has(work.id));
       return matchesSearch && matchesFilter;
     });
-  }, [deferredSearch, filter, works]);
+  }, [deferredSearch, filter, votedIdSet, works]);
 
-  async function quickVote(workId: string) {
-    if (!canVote || remainingVotes < 1) {
+  const selectedWork = works.find((work) => work.id === selectedId) ?? filteredWorks[0] ?? works[0] ?? null;
+  const totalVotes = works.reduce((sum, work) => sum + work.voteCountCache, 0);
+
+  async function quickVote(work: Work, count = 1) {
+    if (!canVote || remainingVotes < count) {
+      message.warning("剩余票数不足或当前账号不可投票");
       return;
     }
     startVoteTransition(async () => {
-      setMessage("");
       const response = await fetch("/api/votes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workId, count: 1 })
+        body: JSON.stringify({ workId: work.id, count })
       });
       const payload = await response.json();
       if (!response.ok) {
-        setMessage(payload.error || "投票失败");
+        message.error(payload.error || "投票失败");
         return;
       }
       setRemainingVotes(payload.remainingVotes);
+      setVotedIds((current) => new Set([...current, work.id]));
       setWorks((current) =>
-        current.map((work) => (work.id === payload.work.id ? { ...work, voteCountCache: payload.work.voteCountCache } : work))
+        current.map((item) =>
+          item.id === payload.work.id ? { ...item, voteCountCache: payload.work.voteCountCache } : item
+        )
       );
-      setMessage(`已投出 1 票，剩余 ${payload.remainingVotes} 票`);
+      message.success(`已投出 ${count} 票，剩余 ${payload.remainingVotes} 票`);
     });
   }
 
   return (
     <div className="stack">
-      <div className="panel card stack">
-        <div className="spread">
-          <div className="stack" style={{ gap: 8 }}>
-            <strong>相册与投票</strong>
-            <span className="hint">按编号、标题、上传人工号搜索。手机端默认双列瀑布流。</span>
+      <div className="photo-toolbar">
+        <Space direction="vertical" size={8} style={{ width: "100%" }}>
+          <div className="spread">
+            <Space wrap>
+              <Input
+                allowClear
+                prefix={<SearchOutlined />}
+                placeholder="搜编号 / 标题"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                style={{ width: 260 }}
+              />
+              <Segmented
+                value={filter}
+                onChange={(value) => setFilter(value as Filter)}
+                options={[
+                  { label: "全部", value: "all" },
+                  { label: "图片", value: "image" },
+                  { label: "视频", value: "video" },
+                  { label: "我投过", value: "voted" }
+                ]}
+              />
+            </Space>
+            <Space wrap>
+              <Badge count={remainingVotes} overflowCount={999} showZero>
+                <Button type="primary" icon={<TrophyOutlined />} disabled={!canVote}>
+                  剩余票
+                </Button>
+              </Badge>
+              <Link href="/upload">
+                <Button icon={<UploadOutlined />}>{currentWork ? "我的作品" : "上传"}</Button>
+              </Link>
+            </Space>
           </div>
-          <span className="badge">剩余 {remainingVotes} 票</span>
-        </div>
-        <div className="row">
-          <input
-            className="input"
-            placeholder="搜索编号 / 标题 / 工号"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-          <select className="select" value={filter} onChange={(event) => setFilter(event.target.value as typeof filter)}>
-            <option value="all">全部</option>
-            <option value="image">图片</option>
-            <option value="video">视频</option>
-          </select>
-        </div>
-        <div className="nav-strip">
-          <Link href="/" className="nav-chip">
-            返回首页
-          </Link>
-          <Link href="/upload" className="nav-chip">
-            上传作品
-          </Link>
-          <Link href="/me/votes" className="nav-chip">
-            我的投票
-          </Link>
-        </div>
-        {message ? <div className="success">{message}</div> : null}
+          {compactHome ? (
+            <div className="stats-grid">
+              <Card size="small">
+                <Statistic title="有效作品" value={works.length} suffix="件" />
+              </Card>
+              <Card size="small">
+                <Statistic title="已投票数" value={totalVotes} suffix="票" />
+              </Card>
+              <Card size="small">
+                <Statistic title="我的编号" value={currentWork?.code ?? "--"} />
+              </Card>
+              <Card size="small">
+                <Statistic title="剩余票数" value={remainingVotes} suffix="票" />
+              </Card>
+            </div>
+          ) : null}
+        </Space>
       </div>
 
-      <div className="masonry">
-        {filteredWorks.map((work) => (
-          <div className="masonry-card" key={work.id}>
-            <div className="work-card">
-              <Link href={`/works/${work.code}`}>
+      <div className="photo-workbench">
+        {filteredWorks.length ? (
+          <div className="photo-grid">
+            {filteredWorks.map((work) => (
+              <div
+                className="photo-tile"
+                key={work.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedId(work.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    setSelectedId(work.id);
+                  }
+                }}
+              >
                 {work.mediaType === "image" ? (
-                  <img className="work-media" src={work.previewUrl} alt={work.title} />
+                  <Image
+                    src={work.previewUrl}
+                    alt={work.title}
+                    preview={false}
+                    className="photo-tile-media"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
                 ) : (
-                  <video className="work-media" src={work.mediaUrl} muted playsInline />
+                  <video className="photo-tile-media" src={work.mediaUrl} muted playsInline />
                 )}
-              </Link>
-              <div className="work-body stack">
-                <div className="spread">
-                  <span className="work-code">{work.code}</span>
-                  <span className="badge">{work.voteCountCache} 票</span>
+                <div className="tile-vote">
+                  <Button
+                    size="small"
+                    type={votedIdSet.has(work.id) ? "default" : "primary"}
+                    shape="circle"
+                    loading={pending}
+                    disabled={!canVote || remainingVotes < 1}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      quickVote(work);
+                    }}
+                  >
+                    ↑
+                  </Button>
                 </div>
-                <div>
-                  <div className="work-title">{work.title}</div>
-                  <div className="work-meta">
-                    上传人工号 {work.ownerEmployeeNo} · {work.ownerDisplayName}
+                <div className="tile-shade">
+                  <div className="spread">
+                    <span className="tile-code">{work.code}</span>
+                    <span>{work.voteCountCache}票</span>
                   </div>
-                </div>
-                <div className="row">
-                  <button className="button" onClick={() => quickVote(work.id)} disabled={!canVote || remainingVotes < 1 || pending}>
-                    {pending ? "提交中..." : "投 1 票"}
-                  </button>
-                  <Link href={`/share/${work.code}`} className="button-secondary">
-                    分享页
-                  </Link>
+                  <div className="tile-meta">{work.title}</div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          <Card>
+            <Empty description="没有匹配的作品" />
+          </Card>
+        )}
+
+        <Card
+          title="快速详情"
+          extra={selectedWork ? <Link href={`/works/${selectedWork.code}`}>打开详情</Link> : null}
+          styles={{ body: { padding: 12 } }}
+        >
+          {selectedWork ? (
+            <Space direction="vertical" size={12} style={{ width: "100%" }}>
+              <div style={{ overflow: "hidden", borderRadius: 8, background: "#0b1220" }}>
+                {selectedWork.mediaType === "image" ? (
+                  <Image
+                    src={selectedWork.previewUrl}
+                    alt={selectedWork.title}
+                    preview
+                    style={{ width: "100%", maxHeight: 360, objectFit: "contain" }}
+                  />
+                ) : (
+                  <video
+                    src={selectedWork.mediaUrl}
+                    controls
+                    playsInline
+                    style={{ width: "100%", maxHeight: 360, display: "block" }}
+                  />
+                )}
+              </div>
+              <Space direction="vertical" size={4}>
+                <Space wrap>
+                  <Tag color="blue">{selectedWork.code}</Tag>
+                  <Tag>{selectedWork.mediaType === "video" ? "视频" : "图片"}</Tag>
+                  {currentWork?.id === selectedWork.id ? <Tag color="green">我的作品</Tag> : null}
+                </Space>
+                <Typography.Title level={4} style={{ margin: 0 }}>
+                  {selectedWork.title}
+                </Typography.Title>
+              </Space>
+              <div className="stats-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                <Card size="small">
+                  <Statistic title="当前票数" value={selectedWork.voteCountCache} suffix="票" />
+                </Card>
+                <Card size="small">
+                  <Statistic title="我剩余" value={remainingVotes} suffix="票" />
+                </Card>
+              </div>
+              <Space wrap>
+                <Button
+                  type="primary"
+                  icon={<TrophyOutlined />}
+                  loading={pending}
+                  disabled={!canVote || remainingVotes < 1}
+                  onClick={() => quickVote(selectedWork)}
+                >
+                  投 1 票
+                </Button>
+                <Link href={`/share/${selectedWork.code}`}>
+                  <Button>分享页</Button>
+                </Link>
+              </Space>
+            </Space>
+          ) : (
+            <Empty description="请选择作品" />
+          )}
+        </Card>
       </div>
+
+      <nav className="mobile-tabbar">
+        <Link href="/" aria-current={compactHome ? "page" : undefined}>
+          <HomeOutlined />
+          首页
+        </Link>
+        <Link href="/gallery" aria-current={!compactHome ? "page" : undefined}>
+          <PictureOutlined />
+          相册
+        </Link>
+        <Link href="/upload">
+          <CameraOutlined />
+          上传
+        </Link>
+        <Link href="/me/votes">
+          <UserOutlined />
+          我的
+        </Link>
+      </nav>
     </div>
   );
 }

@@ -5,8 +5,8 @@ import { LogoutButton } from "@/components/logout-button";
 import { requireAdminPage } from "@/lib/guards";
 import { listAllWorks } from "@/lib/store";
 
-export default function AdminWorksPage() {
-  requireAdminPage("/admin/works");
+export default async function AdminWorksPage() {
+  await requireAdminPage("/admin/works");
   return (
     <div className="page-shell stack">
       <div className="topbar">

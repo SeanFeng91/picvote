@@ -1,17 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Image, Segmented, Space, Typography } from "antd";
+import { useEffect, useMemo, useState } from "react";
 
 import { Work } from "@/lib/types";
 
 type DisplayBoardProps = {
   initialMode: "wall" | "ranking";
   initialWorks: Work[];
+  showPublicVotes: boolean;
 };
 
-export function DisplayBoard({ initialMode, initialWorks }: DisplayBoardProps) {
+export function DisplayBoard({ initialMode, initialWorks, showPublicVotes }: DisplayBoardProps) {
   const [mode, setMode] = useState(initialMode);
   const [works, setWorks] = useState(initialWorks);
+  const [showVotes, setShowVotes] = useState(showPublicVotes);
+  const topWork = works[0] ?? null;
+  const runnerUps = useMemo(() => works.slice(1, 4), [works]);
+  const restWorks = useMemo(() => works.slice(4), [works]);
+  const totalVotes = works.reduce((sum, work) => sum + work.voteCountCache, 0);
 
   useEffect(() => {
     const timer = window.setInterval(async () => {
@@ -21,69 +28,120 @@ export function DisplayBoard({ initialMode, initialWorks }: DisplayBoardProps) {
       }
       const payload = await response.json();
       setWorks(payload.works);
+      if (typeof payload.showPublicVotes === "boolean") {
+        setShowVotes(payload.showPublicVotes);
+      }
     }, 4000);
     return () => window.clearInterval(timer);
   }, []);
 
+  function voteText(work: Work) {
+    return showVotes ? `${work.voteCountCache} 票` : "票数隐藏";
+  }
+
+  function Media({ work, className = "display-work-media" }: { work: Work; className?: string }) {
+    return work.mediaType === "image" ? (
+      <Image src={work.previewUrl} alt={work.title} preview={false} className={className} />
+    ) : (
+      <video className={className} src={work.mediaUrl} muted playsInline />
+    );
+  }
+
   return (
     <div className="display-stage">
-      <div className="spread" style={{ marginBottom: 20 }}>
+      <div className="display-header">
         <div>
-          <div className="eyebrow" style={{ color: "rgba(255,248,241,0.7)" }}>
-            Display
+          <Typography.Text style={{ color: "rgba(248,250,252,0.7)" }}>Vivo Pic Vote Display</Typography.Text>
+          <Typography.Title style={{ color: "#f8fafc", margin: 0 }}>
+            {mode === "wall" ? "作品墙" : "实时排名"}
+          </Typography.Title>
+          <div className="display-metrics">
+            <span>{works.length} 件作品</span>
+            <span>{showVotes ? `${totalVotes} 张有效票` : "票数由后台控制"}</span>
+            <span>每 4 秒自动刷新</span>
           </div>
-          <h1 className="headline" style={{ margin: 0 }}>
-            {mode === "wall" ? "作品墙" : "排行榜"}
-          </h1>
         </div>
-        <div className="row">
-          <button className="button-secondary" onClick={() => setMode("wall")}>
-            作品墙
-          </button>
-          <button className="button" onClick={() => setMode("ranking")}>
-            排行榜
-          </button>
-        </div>
+        <Space>
+          <Segmented
+            value={mode}
+            onChange={(value) => setMode(value as "wall" | "ranking")}
+            options={[
+              { label: "作品墙", value: "wall" },
+              { label: "排行榜", value: "ranking" }
+            ]}
+          />
+        </Space>
       </div>
 
       {mode === "wall" ? (
         <div className="display-grid">
-          {works.map((work) => (
+          {works.map((work, index) => (
             <div className="display-work" key={work.id}>
-              {work.mediaType === "image" ? (
-                <img className="work-media" src={work.previewUrl} alt={work.title} />
-              ) : (
-                <video className="work-media" src={work.mediaUrl} muted playsInline />
-              )}
-              <div className="work-body">
-                <div className="spread">
+              <Media work={work} />
+              <div className="display-work-caption">
+                <div className="spread display-work-title">
                   <strong>{work.code}</strong>
-                  <span>{work.voteCountCache} 票</span>
+                  <span>#{index + 1}</span>
                 </div>
-                <div className="hint" style={{ color: "rgba(255,248,241,0.72)" }}>
-                  {work.ownerEmployeeNo} · {work.ownerDisplayName}
-                </div>
+                <div className="display-work-subtitle">{work.title}</div>
+                <div className="display-work-votes">{voteText(work)}</div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="rank-list">
-          {works.map((work, index) => (
-            <div className="rank-item" key={work.id}>
-              <div style={{ fontSize: 34, fontWeight: 700 }}>#{index + 1}</div>
-              <div>
-                <div className="work-code" style={{ color: "rgba(255,248,241,0.8)" }}>
-                  {work.code}
-                </div>
-                <div style={{ fontSize: 26, fontWeight: 700 }}>{work.title}</div>
-                <div className="hint" style={{ color: "rgba(255,248,241,0.72)" }}>
-                  上传人工号 {work.ownerEmployeeNo} · {work.ownerDisplayName}
-                </div>
+        <div className="ranking-board">
+          {topWork ? (
+            <section className="rank-hero">
+              <div className="rank-hero-media">
+                <Media work={topWork} className="rank-hero-image" />
               </div>
-              <div style={{ fontSize: 28, fontWeight: 700, textAlign: "right" }}>{work.voteCountCache} 票</div>
+              <div className="rank-hero-copy">
+                <div className="rank-medal">#1</div>
+                <div className="rank-code">{topWork.code}</div>
+                <h2>{topWork.title}</h2>
+                <div className="rank-score">{voteText(topWork)}</div>
+              </div>
+            </section>
+          ) : null}
+
+          {runnerUps.length ? (
+            <section className="rank-podium">
+              {runnerUps.map((work, index) => (
+                <div className="rank-podium-item" key={work.id}>
+                  <div className="rank-podium-place">#{index + 2}</div>
+                  <Media work={work} className="rank-podium-media" />
+                  <div className="rank-podium-copy">
+                    <span>{work.code}</span>
+                    <strong>{work.title}</strong>
+                    <em>{voteText(work)}</em>
+                  </div>
+                </div>
+              ))}
+            </section>
+          ) : null}
+
+          {restWorks.length ? (
+            <section className="rank-list">
+              {restWorks.map((work, index) => (
+                <div className="rank-item" key={work.id}>
+                  <div className="rank-index">#{index + 5}</div>
+                  <div className="rank-row-title">
+                    <span>{work.code}</span>
+                    <strong>{work.title}</strong>
+                  </div>
+                  <div className="rank-row-score">{voteText(work)}</div>
+                </div>
+              ))}
+            </section>
+          ) : null}
+
+          {!works.length ? (
+            <div className="display-empty">
+              <div>暂无作品</div>
+              <span>上传开始后，排行榜会自动刷新。</span>
             </div>
-          ))}
+          ) : null}
         </div>
       )}
     </div>

@@ -3,21 +3,22 @@ import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/login-form";
 import { getCurrentUser } from "@/lib/auth";
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams
 }: {
-  searchParams: { returnTo?: string };
+  searchParams: Promise<{ returnTo?: string }>;
 }) {
-  const user = getCurrentUser();
+  const params = await searchParams;
+  const user = await getCurrentUser();
   if (user) {
-    redirect(searchParams.returnTo || "/");
+    redirect(params.returnTo || "/");
   }
   return (
     <LoginForm
       title="参与者登录"
       subtitle="用工号和登录口令进入上传、相册、投票和分享页。"
       intent="user"
-      returnTo={searchParams.returnTo}
+      returnTo={params.returnTo}
     />
   );
 }

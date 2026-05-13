@@ -67,3 +67,32 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   payload_json TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS upload_sessions (
+  id TEXT PRIMARY KEY,
+  work_draft_id TEXT NOT NULL,
+  activity_id TEXT NOT NULL,
+  owner_user_id TEXT NOT NULL,
+  object_key TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  title TEXT NOT NULL,
+  media_type TEXT NOT NULL,
+  mime_type TEXT NOT NULL,
+  size_bytes INTEGER NOT NULL,
+  part_size INTEGER NOT NULL,
+  total_parts INTEGER NOT NULL,
+  parts_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  error TEXT,
+  result_work_id TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_works_one_active_per_owner
+ON works(owner_user_id)
+WHERE status IN ('active', 'hidden');
+
+CREATE INDEX IF NOT EXISTS idx_upload_sessions_owner_status
+ON upload_sessions(owner_user_id, status);

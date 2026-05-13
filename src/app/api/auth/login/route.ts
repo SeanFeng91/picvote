@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "当前账号不是管理员" }, { status: 403 });
   }
 
-  setSessionCookie({ userId: user.id, role: user.role });
+  await setSessionCookie({ userId: user.id, role: user.role });
   return NextResponse.json({
     ok: true,
     redirectTo: payload.returnTo || (payload.intent === "admin" ? "/admin" : user.role === "admin" ? "/admin" : "/")

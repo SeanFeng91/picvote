@@ -6,9 +6,10 @@ import { WorkDetailClient } from "@/components/work-detail-client";
 import { requireUserPage } from "@/lib/guards";
 import { getWorkByCode, remainingVotesForUser } from "@/lib/store";
 
-export default function SharePage({ params }: { params: { code: string } }) {
-  const user = requireUserPage(`/share/${params.code}`);
-  const work = getWorkByCode(params.code);
+export default async function SharePage({ params }: { params: Promise<{ code: string }> }) {
+  const { code } = await params;
+  const user = await requireUserPage(`/share/${code}`);
+  const work = getWorkByCode(code);
   if (!work || work.status !== "active") {
     notFound();
   }

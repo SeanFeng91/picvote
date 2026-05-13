@@ -1,10 +1,17 @@
 import { DisplayBoard } from "@/components/display-board";
-import { listWorks } from "@/lib/store";
+import { getActivity, listWorks } from "@/lib/store";
 
-export default function DisplayPage({
+export default async function DisplayPage({
   searchParams
 }: {
-  searchParams: { mode?: "wall" | "ranking" };
+  searchParams: Promise<{ mode?: "wall" | "ranking" }>;
 }) {
-  return <DisplayBoard initialMode={searchParams.mode || "wall"} initialWorks={listWorks(false)} />;
+  const params = await searchParams;
+  return (
+    <DisplayBoard
+      initialMode={params.mode || "wall"}
+      initialWorks={listWorks(false)}
+      showPublicVotes={getActivity().showPublicVotes}
+    />
+  );
 }

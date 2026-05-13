@@ -32,8 +32,9 @@ function decode(token: string): SessionPayload | null {
   }
 }
 
-export function setSessionCookie(payload: SessionPayload) {
-  cookies().set(SESSION_COOKIE, encode(payload), {
+export async function setSessionCookie(payload: SessionPayload) {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, encode(payload), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
@@ -42,20 +43,22 @@ export function setSessionCookie(payload: SessionPayload) {
   });
 }
 
-export function clearSessionCookie() {
-  cookies().delete(SESSION_COOKIE);
+export async function clearSessionCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
 }
 
-export function getSessionPayload() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+export async function getSessionPayload() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) {
     return null;
   }
   return decode(token);
 }
 
-export function getCurrentUser() {
-  const payload = getSessionPayload();
+export async function getCurrentUser() {
+  const payload = await getSessionPayload();
   if (!payload) {
     return null;
   }
