@@ -1,0 +1,230 @@
+import { AppStore } from "@/lib/types";
+
+const now = new Date().toISOString();
+
+export const seedStore: AppStore = {
+  activity: {
+    id: "activity-spring-picvote",
+    name: "春季影像投票",
+    status: "voting",
+    defaultVoteQuota: 5,
+    allowSelfVote: true,
+    showPublicVotes: true,
+    uploadEndsAt: null,
+    voteEndsAt: null,
+    createdAt: now,
+    updatedAt: now
+  },
+  users: [
+    {
+      id: "user-admin",
+      employeeNo: "90001",
+      displayName: "活动管理员",
+      role: "admin",
+      canUpload: false,
+      canVote: false,
+      voteQuota: 0,
+      accessCode: "admin123",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "user-10001",
+      employeeNo: "10001",
+      displayName: "林岚",
+      role: "participant",
+      canUpload: true,
+      canVote: true,
+      voteQuota: null,
+      accessCode: "demo123",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "user-10002",
+      employeeNo: "10002",
+      displayName: "周宁",
+      role: "participant",
+      canUpload: true,
+      canVote: true,
+      voteQuota: null,
+      accessCode: "demo123",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "user-10003",
+      employeeNo: "10003",
+      displayName: "沈秋",
+      role: "participant",
+      canUpload: true,
+      canVote: true,
+      voteQuota: 8,
+      accessCode: "demo123",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "user-10004",
+      employeeNo: "10004",
+      displayName: "陈越",
+      role: "participant",
+      canUpload: true,
+      canVote: true,
+      voteQuota: null,
+      accessCode: "demo123",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "user-10005",
+      employeeNo: "10005",
+      displayName: "白一",
+      role: "special",
+      canUpload: true,
+      canVote: true,
+      voteQuota: 10,
+      accessCode: "demo123",
+      createdAt: now,
+      updatedAt: now
+    }
+  ],
+  works: [
+    {
+      id: "work-1",
+      activityId: "activity-spring-picvote",
+      ownerUserId: "user-10001",
+      ownerEmployeeNo: "10001",
+      ownerDisplayName: "林岚",
+      code: "A001",
+      title: "雨后站台",
+      mediaType: "image",
+      mediaUrl: "/demo/rain-station.svg",
+      previewUrl: "/demo/rain-station.svg",
+      mimeType: "image/svg+xml",
+      originalFileName: "rain-station.svg",
+      sizeBytes: 1024,
+      status: "active",
+      voteCountCache: 9,
+      sharePath: "/share/A001",
+      createdAt: now,
+      deletedAt: null
+    },
+    {
+      id: "work-2",
+      activityId: "activity-spring-picvote",
+      ownerUserId: "user-10002",
+      ownerEmployeeNo: "10002",
+      ownerDisplayName: "周宁",
+      code: "A002",
+      title: "厂房的风",
+      mediaType: "image",
+      mediaUrl: "/demo/factory-wind.svg",
+      previewUrl: "/demo/factory-wind.svg",
+      mimeType: "image/svg+xml",
+      originalFileName: "factory-wind.svg",
+      sizeBytes: 1024,
+      status: "active",
+      voteCountCache: 5,
+      sharePath: "/share/A002",
+      createdAt: now,
+      deletedAt: null
+    },
+    {
+      id: "work-3",
+      activityId: "activity-spring-picvote",
+      ownerUserId: "user-10003",
+      ownerEmployeeNo: "10003",
+      ownerDisplayName: "沈秋",
+      code: "A003",
+      title: "楼梯尽头",
+      mediaType: "image",
+      mediaUrl: "/demo/stair-horizon.svg",
+      previewUrl: "/demo/stair-horizon.svg",
+      mimeType: "image/svg+xml",
+      originalFileName: "stair-horizon.svg",
+      sizeBytes: 1024,
+      status: "active",
+      voteCountCache: 12,
+      sharePath: "/share/A003",
+      createdAt: now,
+      deletedAt: null
+    }
+  ],
+  votes: [
+    {
+      id: "vote-1",
+      activityId: "activity-spring-picvote",
+      voterUserId: "user-10004",
+      voterEmployeeNo: "10004",
+      workId: "work-1",
+      workCode: "A001",
+      count: 4,
+      status: "valid",
+      reason: null,
+      createdAt: now
+    },
+    {
+      id: "vote-2",
+      activityId: "activity-spring-picvote",
+      voterUserId: "user-10005",
+      voterEmployeeNo: "10005",
+      workId: "work-1",
+      workCode: "A001",
+      count: 5,
+      status: "valid",
+      reason: null,
+      createdAt: now
+    },
+    {
+      id: "vote-3",
+      activityId: "activity-spring-picvote",
+      voterUserId: "user-10001",
+      voterEmployeeNo: "10001",
+      workId: "work-3",
+      workCode: "A003",
+      count: 5,
+      status: "valid",
+      reason: null,
+      createdAt: now
+    },
+    {
+      id: "vote-4",
+      activityId: "activity-spring-picvote",
+      voterUserId: "user-10002",
+      voterEmployeeNo: "10002",
+      workId: "work-3",
+      workCode: "A003",
+      count: 4,
+      status: "valid",
+      reason: null,
+      createdAt: now
+    },
+    {
+      id: "vote-5",
+      activityId: "activity-spring-picvote",
+      voterUserId: "user-10004",
+      voterEmployeeNo: "10004",
+      workId: "work-2",
+      workCode: "A002",
+      count: 5,
+      status: "valid",
+      reason: null,
+      createdAt: now
+    },
+    {
+      id: "vote-6",
+      activityId: "activity-spring-picvote",
+      voterUserId: "user-10005",
+      voterEmployeeNo: "10005",
+      workId: "work-3",
+      workCode: "A003",
+      count: 3,
+      status: "valid",
+      reason: null,
+      createdAt: now
+    }
+  ],
+  auditLogs: [],
+  uploadSessions: []
+};
