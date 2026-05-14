@@ -2,7 +2,6 @@
 
 import { LockOutlined, NumberOutlined } from "@ant-design/icons";
 import { Alert, Button, Card, Form, Input, Space, Typography } from "antd";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type LoginFormProps = {
@@ -13,7 +12,6 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ title, subtitle, intent = "user", returnTo }: LoginFormProps) {
-  const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -35,8 +33,7 @@ export function LoginForm({ title, subtitle, intent = "user", returnTo }: LoginF
       return;
     }
 
-    router.push(payload.redirectTo);
-    router.refresh();
+    window.location.assign(payload.redirectTo);
   }
 
   return (

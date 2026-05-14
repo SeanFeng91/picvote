@@ -1,0 +1,147 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: Vivo Pic Vote · 春季影像投票
+        - heading "相册投票工作台" [level=1] [ref=e7]
+      - generic [ref=e8]:
+        - generic [ref=e9]: voting
+        - button "logout 退出" [ref=e10] [cursor=pointer]:
+          - img "logout" [ref=e12]:
+            - img [ref=e13]
+          - generic [ref=e15]: 退出
+    - generic [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - generic [ref=e23]:
+              - img "search" [ref=e25]:
+                - img [ref=e26]
+              - textbox "搜编号 / 标题" [ref=e28]
+            - radiogroup "segmented control" [ref=e31]:
+              - generic [ref=e32]:
+                - generic [ref=e33] [cursor=pointer]:
+                  - radio "全部" [checked]
+                  - generic "全部" [ref=e34]
+                - generic [ref=e35] [cursor=pointer]:
+                  - radio "图片"
+                  - generic "图片" [ref=e36]
+                - generic [ref=e37] [cursor=pointer]:
+                  - radio "视频"
+                  - generic "视频" [ref=e38]
+                - generic [ref=e39] [cursor=pointer]:
+                  - radio "我投过"
+                  - generic "我投过" [ref=e40]
+          - generic [ref=e41]:
+            - generic [ref=e43]:
+              - button "trophy 剩余票" [ref=e44] [cursor=pointer]:
+                - img "trophy" [ref=e46]:
+                  - img [ref=e47]
+                - generic [ref=e49]: 剩余票
+              - superscript [ref=e50]: "0"
+            - link "upload 我的作品" [ref=e52] [cursor=pointer]:
+              - /url: /upload
+              - button "upload 我的作品" [ref=e53]:
+                - img "upload" [ref=e55]:
+                  - img [ref=e56]
+                - generic [ref=e58]: 我的作品
+        - generic [ref=e60]:
+          - generic [ref=e63]:
+            - generic [ref=e65]: 有效作品
+            - generic [ref=e66]:
+              - generic [ref=e67]: "3"
+              - generic [ref=e68]: 件
+          - generic [ref=e71]:
+            - generic [ref=e73]: 已投票数
+            - generic [ref=e74]:
+              - generic [ref=e75]: "28"
+              - generic [ref=e76]: 票
+          - generic [ref=e79]:
+            - generic [ref=e81]: 我的编号
+            - generic [ref=e83]: A001
+          - generic [ref=e86]:
+            - generic [ref=e88]: 剩余票数
+            - generic [ref=e89]:
+              - generic [ref=e90]: "0"
+              - generic [ref=e91]: 票
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - button "楼梯尽头 rollback A003 12票" [ref=e94] [cursor=pointer]:
+            - img "楼梯尽头" [ref=e96]
+            - button "rollback" [ref=e98]:
+              - img "rollback" [ref=e99]:
+                - img [ref=e100]
+            - generic [ref=e103]:
+              - generic [ref=e104]: A003
+              - generic [ref=e105]: 12票
+          - button "雨后站台 trophy A001 11票" [ref=e106] [cursor=pointer]:
+            - img "雨后站台" [ref=e108]
+            - button "trophy" [disabled] [ref=e110]:
+              - img "trophy":
+                - img
+            - generic [ref=e112]:
+              - generic [ref=e113]: A001
+              - generic [ref=e114]: 11票
+          - button "厂房的风 trophy A002 5票" [ref=e115] [cursor=pointer]:
+            - img "厂房的风" [ref=e117]
+            - button "trophy" [disabled] [ref=e119]:
+              - img "trophy":
+                - img
+            - generic [ref=e121]:
+              - generic [ref=e122]: A002
+              - generic [ref=e123]: 5票
+        - generic [ref=e124]:
+          - generic [ref=e126]:
+            - generic [ref=e127]: 快速详情
+            - link "打开详情" [ref=e129] [cursor=pointer]:
+              - /url: /works/A003
+          - generic [ref=e131]:
+            - button "楼梯尽头" [ref=e134]:
+              - img "楼梯尽头" [ref=e135]
+            - generic [ref=e138]:
+              - generic [ref=e140]:
+                - generic [ref=e142]: A003
+                - generic [ref=e144]: 图片
+              - heading "楼梯尽头" [level=4] [ref=e146]
+            - generic [ref=e148]:
+              - generic [ref=e151]:
+                - generic [ref=e153]: 当前票数
+                - generic [ref=e154]:
+                  - generic [ref=e155]: "12"
+                  - generic [ref=e156]: 票
+              - generic [ref=e159]:
+                - generic [ref=e161]: 我剩余
+                - generic [ref=e162]:
+                  - generic [ref=e163]: "0"
+                  - generic [ref=e164]: 票
+            - generic [ref=e166]:
+              - button "trophy 撤回 5 票" [ref=e168] [cursor=pointer]:
+                - img "trophy" [ref=e170]:
+                  - img [ref=e171]
+                - generic [ref=e173]: 撤回 5 票
+              - link "分享页" [ref=e175] [cursor=pointer]:
+                - /url: /share/A003
+                - button "分享页" [ref=e176]:
+                  - generic [ref=e177]: 分享页
+      - navigation [ref=e178]:
+        - link "home 首页" [ref=e179] [cursor=pointer]:
+          - /url: /
+          - img "home" [ref=e180]:
+            - img [ref=e181]
+          - text: 首页
+        - link "picture 相册" [ref=e183] [cursor=pointer]:
+          - /url: /gallery
+          - img "picture" [ref=e184]:
+            - img [ref=e185]
+          - text: 相册
+        - link "camera 上传" [ref=e187] [cursor=pointer]:
+          - /url: /upload
+          - img "camera" [ref=e188]:
+            - img [ref=e189]
+          - text: 上传
+        - link "user 我的" [ref=e191] [cursor=pointer]:
+          - /url: /me/votes
+          - img "user" [ref=e192]:
+            - img [ref=e193]
+          - text: 我的
+  - alert [ref=e195]
