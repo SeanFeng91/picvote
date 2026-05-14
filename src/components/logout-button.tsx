@@ -11,7 +11,7 @@ export function LogoutButton({ redirectTo = "/login" }: { redirectTo?: string })
 
   async function handleLogout() {
     setPending(true);
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
     router.push(redirectTo);
     router.refresh();
   }

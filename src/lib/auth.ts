@@ -32,13 +32,22 @@ function decode(token: string): SessionPayload | null {
   }
 }
 
-export async function setSessionCookie(payload: SessionPayload) {
+function isSecureRequest(request: Request) {
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  if (forwardedProto) {
+    return forwardedProto === "https";
+  }
+
+  return new URL(request.url).protocol === "https:";
+}
+
+export async function setSessionCookie(payload: SessionPayload, request: Request) {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, encode(payload), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecureRequest(request),
     maxAge: 60 * 60 * 24 * 3
   });
 }
