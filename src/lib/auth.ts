@@ -41,15 +41,29 @@ function isSecureRequest(request: Request) {
   return new URL(request.url).protocol === "https:";
 }
 
+/**
+ * Build cookie options (shared between cookies() and NextResponse.cookies approaches)
+ */
+export function buildSessionCookie(payload: SessionPayload, request: Request) {
+  const token = encode(payload);
+  const secure = isSecureRequest(request);
+  return {
+    name: SESSION_COOKIE,
+    value: token,
+    options: {
+      httpOnly: true,
+      sameSite: "lax" as const,
+      path: "/",
+      secure,
+      maxAge: 60 * 60 * 24 * 3
+    }
+  };
+}
+
 export async function setSessionCookie(payload: SessionPayload, request: Request) {
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, encode(payload), {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    secure: isSecureRequest(request),
-    maxAge: 60 * 60 * 24 * 3
-  });
+  const { name, value, options } = buildSessionCookie(payload, request);
+  cookieStore.set(name, value, options);
 }
 
 export async function clearSessionCookie() {

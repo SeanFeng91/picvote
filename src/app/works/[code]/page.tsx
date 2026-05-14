@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { LogoutButton } from "@/components/logout-button";
 import { WorkDetailClient } from "@/components/work-detail-client";
 import { requireUserPage } from "@/lib/guards";
 import { getWorkByCode, listVotesForUser, remainingVotesForUser } from "@/lib/store";
@@ -18,18 +16,6 @@ export default async function WorkDetailPage({ params }: { params: Promise<{ cod
 
   return (
     <div className="page-shell stack">
-      <div className="topbar">
-        <div className="brand-lockup">
-          <span className="eyebrow">Work Detail</span>
-          <h1 className="headline">作品详情</h1>
-        </div>
-        <div className="row">
-          <Link href="/gallery" className="button-secondary">
-            返回相册
-          </Link>
-          <LogoutButton />
-        </div>
-      </div>
       <WorkDetailClient
         work={work}
         remainingVotes={remainingVotes}

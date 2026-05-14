@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { setSessionCookie } from "@/lib/auth";
+import { buildSessionCookie } from "@/lib/auth";
 import { authenticate } from "@/lib/store";
 
 const schema = z.object({
@@ -21,9 +21,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "当前账号不是管理员" }, { status: 403 });
   }
 
-  await setSessionCookie({ userId: user.id, role: user.role }, request);
-  return NextResponse.json({
-    ok: true,
-    redirectTo: payload.returnTo || (user.role === "admin" ? "/admin" : "/")
-  });
+  // Build response first, then set cookie directly on the response object
+  // This is more reliable than cookies().set() in edge/worker runtimes
+  const redirectTo = payload.returnTo || (user.role === "admin" ? "/admin" : "/");
+  const response = NextResponse.json({ ok: true, redirectTo });
+  const { name, value, options } = buildSessionCookie(
+    { userId: user.id, role: user.role },
+    request
+  );
+  response.cookies.set(name, value, options);
+  return response;
 }

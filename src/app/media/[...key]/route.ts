@@ -4,6 +4,7 @@ import { getMediaBucket } from "@/lib/cloudflare";
 
 type R2ObjectBody = {
   body: BodyInit | null;
+  size?: number;
   httpMetadata?: {
     contentType?: string;
     cacheControl?: string;
@@ -29,6 +30,17 @@ export async function GET(_: Request, { params }: { params: Promise<{ key: strin
   if (object.httpMetadata?.contentType) {
     headers.set("content-type", object.httpMetadata.contentType);
   }
-  headers.set("cache-control", object.httpMetadata?.cacheControl || "public, max-age=31536000, immutable");
+  // Aggressive caching for immutable media assets
+  headers.set(
+    "cache-control",
+    object.httpMetadata?.cacheControl || "public, max-age=31536000, immutable"
+  );
+  // Enable range requests for better video performance
+  headers.set("accept-ranges", "bytes");
+  // CORS for media assets
+  headers.set("access-control-allow-origin", "*");
+  // Timing
+  headers.set("timing-allow-origin", "*");
+
   return new Response(object.body, { headers });
 }

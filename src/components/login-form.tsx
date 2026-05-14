@@ -1,7 +1,7 @@
 "use client";
 
 import { LockOutlined, NumberOutlined } from "@ant-design/icons";
-import { Alert, Button, Card, Form, Input, Space, Typography } from "antd";
+import { Alert, Button, Card, Form, Input, Typography } from "antd";
 import { useState } from "react";
 
 type LoginFormProps = {
@@ -19,49 +19,67 @@ export function LoginForm({ title, subtitle, intent = "user", returnTo }: LoginF
     setPending(true);
     setMessage("");
 
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...values, intent, returnTo })
-    });
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, intent, returnTo })
+      });
 
-    const payload = await response.json();
-    setPending(false);
-    if (!response.ok) {
-      setMessage(payload.error || "登录失败");
-      return;
+      const payload = await response.json();
+      if (!response.ok) {
+        setPending(false);
+        setMessage(payload.error || "登录失败");
+        return;
+      }
+
+      // Use href assignment for maximum mobile browser compatibility
+      // Keep pending=true to show loading state during navigation
+      window.location.href = payload.redirectTo;
+    } catch {
+      setPending(false);
+      setMessage("网络异常，请重试");
     }
-
-    window.location.assign(payload.redirectTo);
   }
 
   return (
-    <div className="page-shell" style={{ maxWidth: 440 }}>
-      <Card bordered={false}>
-        <Space direction="vertical" size={16} style={{ width: "100%" }}>
-          <div>
-            <Typography.Text type="secondary">Vivo Pic Vote</Typography.Text>
-            <Typography.Title level={2} style={{ margin: "4px 0" }}>
+    <div className="page-shell" style={{ maxWidth: 440, paddingTop: 60 }}>
+      <Card variant="borderless" style={{ borderRadius: 20, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ textAlign: "center", marginBottom: 8 }}>
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 56,
+              height: 56,
+              borderRadius: 16,
+              background: "linear-gradient(135deg, #415FFF, #6B82FF)",
+              marginBottom: 16
+            }}>
+              <span style={{ fontSize: 28, color: "#fff" }}>📷</span>
+            </div>
+            <Typography.Title level={3} style={{ margin: "0 0 4px" }}>
               {title}
             </Typography.Title>
-            <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
+            <Typography.Paragraph type="secondary" style={{ margin: 0, fontSize: 14 }}>
               {subtitle}
             </Typography.Paragraph>
           </div>
-          <Form layout="vertical" onFinish={handleSubmit}>
+          <Form layout="vertical" onFinish={handleSubmit} size="large">
             <Form.Item name="employeeNo" label="工号" rules={[{ required: true, message: "请输入工号" }]}>
               <Input inputMode="numeric" prefix={<NumberOutlined />} placeholder="请输入活动工号" autoComplete="username" />
             </Form.Item>
             <Form.Item name="accessCode" label="登录口令" rules={[{ required: true, message: "请输入口令" }]}>
               <Input.Password prefix={<LockOutlined />} placeholder="请输入登录口令" autoComplete="current-password" />
             </Form.Item>
-            <Button type="primary" htmlType="submit" block loading={pending}>
+            <Button type="primary" htmlType="submit" block loading={pending} size="large" style={{ height: 48, borderRadius: 24, fontWeight: 600 }}>
               进入系统
             </Button>
           </Form>
           {message ? <Alert type="error" showIcon message={message} /> : null}
-        </Space>
+        </div>
       </Card>
     </div>
   );

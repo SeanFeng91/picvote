@@ -19,8 +19,8 @@ export default async function HomePage() {
     <div className="page-shell stack">
       <div className="topbar">
         <div className="brand-lockup">
-          <span className="eyebrow">Vivo Pic Vote · {activity.name}</span>
-          <h1 className="headline">相册投票工作台</h1>
+          <span className="eyebrow">{activity.name}</span>
+          <h1 className="headline">vivo 相册投票</h1>
         </div>
         <div className="row">
           <span className={`status-pill ${activity.status === "voting" ? "is-live" : ""}`}>{activity.status}</span>

@@ -10,41 +10,57 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       theme={{
         algorithm: theme.compactAlgorithm,
         token: {
-          colorPrimary: "#1677ff",
-          colorSuccess: "#16a34a",
-          colorWarning: "#d97706",
-          colorError: "#dc2626",
-          colorText: "#111827",
-          colorTextSecondary: "#5b6472",
-          colorBgLayout: "#f5f7fb",
-          borderRadius: 8,
+          colorPrimary: "#415FFF",
+          colorSuccess: "#00B578",
+          colorWarning: "#FF8F1F",
+          colorError: "#FA2C19",
+          colorInfo: "#415FFF",
+          colorText: "#1A1A1A",
+          colorTextSecondary: "#7C7C7C",
+          colorBgLayout: "#F5F6FA",
+          borderRadius: 12,
           wireframe: false,
           fontFamily:
-            "Alibaba PuHuiTi, MiSans, PingFang SC, Noto Sans SC, Microsoft YaHei, system-ui, sans-serif"
+            '-apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif',
+          controlHeight: 40
         },
         components: {
           Button: {
-            controlHeight: 36,
-            borderRadius: 8
+            controlHeight: 40,
+            borderRadius: 20,
+            primaryShadow: "0 2px 8px rgba(65,95,255,0.3)"
           },
           Card: {
-            borderRadiusLG: 8,
+            borderRadiusLG: 16,
             paddingLG: 16
           },
           Table: {
             cellPaddingBlock: 8,
             cellPaddingInline: 10,
-            headerBg: "#f8fafc"
+            headerBg: "#F5F6FA"
           },
           Input: {
-            controlHeight: 38
+            controlHeight: 40,
+            borderRadius: 20
           },
           Select: {
-            controlHeight: 38
+            controlHeight: 40,
+            borderRadius: 12
+          },
+          Segmented: {
+            borderRadius: 20,
+            itemSelectedBg: "#415FFF",
+            itemSelectedColor: "#FFFFFF"
+          },
+          Tag: {
+            borderRadiusSM: 10
+          },
+          Badge: {
+            dotSize: 8
           },
           Statistic: {
-            titleFontSize: 12,
-            contentFontSize: 28
+            titleFontSize: 11,
+            contentFontSize: 22
           }
         }
       }}
