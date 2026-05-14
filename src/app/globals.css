@@ -183,7 +183,7 @@ textarea {
 
 .photo-workbench {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) minmax(336px, 388px);
   gap: 12px;
   align-items: start;
 }
@@ -199,7 +199,7 @@ textarea {
 
 .photo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(154px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
   gap: 4px;
 }
 
@@ -257,6 +257,10 @@ textarea {
   top: 6px;
   right: 6px;
   z-index: 3;
+}
+
+.tile-vote :where(.ant-btn) {
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.24);
 }
 
 .mobile-tabbar {
@@ -322,6 +326,11 @@ textarea {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.display-header :where(.ant-btn, .ant-segmented) {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .display-metrics {
@@ -620,7 +629,7 @@ textarea {
   }
 
   .photo-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2px;
   }
 
@@ -697,6 +706,12 @@ textarea {
 
   .display-header {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .display-header :where(.ant-space) {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .rank-hero,

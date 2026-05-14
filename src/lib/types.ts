@@ -88,6 +88,7 @@ export type UploadSession = {
   activityId: string;
   ownerUserId: string;
   objectKey: string;
+  storageUploadId: string | null;
   fileName: string;
   title: string;
   mediaType: MediaType;

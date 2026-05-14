@@ -7,6 +7,7 @@ import { listVotes } from "@/lib/store";
 
 export default async function AdminVotesPage() {
   await requireAdminPage("/admin/votes");
+  const votes = await listVotes();
   return (
     <div className="page-shell stack">
       <div className="topbar">
@@ -18,10 +19,10 @@ export default async function AdminVotesPage() {
           <Link href="/admin" className="button-secondary">
             返回后台
           </Link>
-          <LogoutButton redirectTo="/admin/login" />
+          <LogoutButton redirectTo="/login?returnTo=%2F" />
         </div>
       </div>
-      <AdminVotesClient initialVotes={listVotes()} />
+      <AdminVotesClient initialVotes={votes} />
     </div>
   );
 }

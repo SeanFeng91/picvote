@@ -10,7 +10,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ uploadId: 
     return NextResponse.json({ error: "未登录" }, { status: 401 });
   }
 
-  const session = getUploadSession(uploadId);
+  const session = await getUploadSession(uploadId);
   if (!session || session.ownerUserId !== user.id) {
     return NextResponse.json({ error: "上传会话不存在" }, { status: 404 });
   }

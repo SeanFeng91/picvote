@@ -13,9 +13,13 @@ function inferMediaType(file: File) {
 
 export async function GET() {
   const user = await getCurrentUser();
+  const [works, remainingVotes] = await Promise.all([
+    listWorks(false),
+    user ? remainingVotesForUser(user.id) : Promise.resolve(null)
+  ]);
   return NextResponse.json({
-    works: listWorks(false),
-    remainingVotes: user ? remainingVotesForUser(user.id) : null
+    works,
+    remainingVotes
   });
 }
 
@@ -39,7 +43,7 @@ export async function POST(request: Request) {
 
   const saved = await saveUploadedFile(file, `${user.employeeNo}-${Date.now()}`);
   try {
-    const work = createWork({
+    const work = await createWork({
       owner: user,
       title,
       mediaType: inferMediaType(file),

@@ -1,6 +1,7 @@
 type CloudflareEnv = {
   DB?: unknown;
   MEDIA_BUCKET?: unknown;
+  VIVOPICVOTE_PUBLIC_BASE_URL?: string;
 };
 
 async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
@@ -29,4 +30,9 @@ export async function getMediaBucket() {
 
   const env = await getCloudflareEnv();
   return env?.MEDIA_BUCKET ?? null;
+}
+
+export async function getPublicBaseUrl() {
+  const env = await getCloudflareEnv();
+  return env?.VIVOPICVOTE_PUBLIC_BASE_URL || process.env.VIVOPICVOTE_PUBLIC_BASE_URL || "";
 }

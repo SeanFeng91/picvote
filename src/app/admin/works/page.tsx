@@ -7,6 +7,7 @@ import { listAllWorks } from "@/lib/store";
 
 export default async function AdminWorksPage() {
   await requireAdminPage("/admin/works");
+  const works = await listAllWorks();
   return (
     <div className="page-shell stack">
       <div className="topbar">
@@ -18,10 +19,10 @@ export default async function AdminWorksPage() {
           <Link href="/admin" className="button-secondary">
             返回后台
           </Link>
-          <LogoutButton redirectTo="/admin/login" />
+          <LogoutButton redirectTo="/login?returnTo=%2F" />
         </div>
       </div>
-      <AdminWorksClient initialWorks={listAllWorks()} />
+      <AdminWorksClient initialWorks={works} />
     </div>
   );
 }

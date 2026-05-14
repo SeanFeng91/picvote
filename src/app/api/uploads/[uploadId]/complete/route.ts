@@ -29,7 +29,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ upl
 
   try {
     const payload = schema.parse(await request.json().catch(() => ({})));
-    const session = getUploadSession(uploadId);
+    const session = await getUploadSession(uploadId);
     if (!session || session.ownerUserId !== user.id) {
       return NextResponse.json({ error: "上传会话不存在" }, { status: 404 });
     }
@@ -38,7 +38,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ upl
       uploadedAt: part.uploadedAt ?? new Date().toISOString()
     }));
     const saved = await completeUploadedParts(session, parts);
-    const completed = completeUploadSession({
+    const completed = await completeUploadSession({
       actor: user,
       uploadId,
       mediaUrl: saved.mediaUrl,

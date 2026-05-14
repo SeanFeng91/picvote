@@ -13,7 +13,7 @@ export async function requireUserPage(returnTo: string) {
 export async function requireAdminPage(returnTo: string) {
   const user = await getCurrentUser();
   if (!user) {
-    redirect(`/admin/login?returnTo=${encodeURIComponent(returnTo)}`);
+    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
   if (user.role !== "admin") {
     redirect("/");

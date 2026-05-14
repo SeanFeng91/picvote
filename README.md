@@ -80,5 +80,7 @@ npm run cf:d1:migrate:remote
 
 - 当前 shell 如果是 Node 20，会无法运行 Wrangler 4；请先执行 `nvm use`，确认 `node -v` 是 `.nvmrc` 指定的 24.14.0 或任意 Node 22+。
 - `npx wrangler deploy --dry-run` 只做预检，不会在 Cloudflare 上创建 Worker。真正创建或更新 Worker 要执行 `npm run cf:deploy`。
+- `wrangler.jsonc` 已开启 `workers_dev: true`，部署成功后会先通过 `https://vivopicvote.<你的 workers.dev 子域>.workers.dev` 访问。Cloudflare Dashboard 里显示“无路由”通常只是表示还没有绑定自定义域名，不代表 `workers.dev` 访问不可用。
+- 如果要绑定正式域名，需要在 `wrangler.jsonc` 里增加 `routes`，例如 `{ "pattern": "picvote.example.com", "custom_domain": true }`，然后重新执行 `npm run cf:deploy`。
 - 如果构建时出现 `PageNotFoundError: Cannot find module for page`，先执行 `npm run cf:clean` 清掉旧 `.next` / `.open-next` 产物，再重新 `npm run cf:build`。
-- 当前代码已经具备 OpenNext / Wrangler 部署入口，但业务数据层仍默认使用本地 JSON 和本地上传目录兜底；要让手机端线上真实写入 Cloudflare，还需要把 `src/lib/store.ts` 和 `src/lib/storage.ts` 完整切到 D1 / R2。
+- 当前代码在 Cloudflare 环境会优先使用 D1 / R2；本地没有 binding 时才回退到 `data/store.json` 和 `public/uploads/`。部署新版前先执行 `npm run cf:d1:migrate:remote`，确保远端表结构包含最新上传字段。

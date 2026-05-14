@@ -5,6 +5,7 @@ import { getWorkForUser } from "@/lib/store";
 
 export default async function UploadPage() {
   const user = await requireUserPage("/upload");
+  const currentWork = await getWorkForUser(user.id);
   return (
     <div className="page-shell stack">
       <div className="topbar">
@@ -14,7 +15,7 @@ export default async function UploadPage() {
         </div>
         <LogoutButton />
       </div>
-      <UploadForm currentWork={getWorkForUser(user.id)} canUpload={user.canUpload} />
+      <UploadForm currentWork={currentWork} canUpload={user.canUpload} />
     </div>
   );
 }

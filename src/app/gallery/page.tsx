@@ -5,7 +5,12 @@ import { getWorkForUser, listVotesForUser, listWorks, remainingVotesForUser } fr
 
 export default async function GalleryPage() {
   const user = await requireUserPage("/gallery");
-  const votes = listVotesForUser(user.id);
+  const [votes, works, remainingVotes, currentWork] = await Promise.all([
+    listVotesForUser(user.id),
+    listWorks(false),
+    remainingVotesForUser(user.id),
+    getWorkForUser(user.id)
+  ]);
   return (
     <div className="page-shell stack">
       <div className="topbar">
@@ -16,11 +21,11 @@ export default async function GalleryPage() {
         <LogoutButton />
       </div>
       <GalleryClient
-        initialWorks={listWorks(false)}
-        initialRemainingVotes={remainingVotesForUser(user.id)}
+        initialWorks={works}
+        initialRemainingVotes={remainingVotes}
         canVote={user.canVote}
-        currentWork={getWorkForUser(user.id)}
-        votedWorkIds={votes.filter((vote) => vote.status === "valid").map((vote) => vote.workId)}
+        currentWork={currentWork}
+        initialVotes={votes}
       />
     </div>
   );

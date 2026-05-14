@@ -5,17 +5,20 @@ import { App, Button, Card, Image, InputNumber, Space, Statistic, Tag, Typograph
 import { useState, useTransition } from "react";
 
 import { Work } from "@/lib/types";
+import type { Vote } from "@/lib/types";
 
 type WorkDetailClientProps = {
   work: Work;
   remainingVotes: number;
   canVote: boolean;
   isOwner: boolean;
+  activeVote?: Vote | null;
 };
 
-export function WorkDetailClient({ work, remainingVotes: startingVotes, canVote, isOwner }: WorkDetailClientProps) {
+export function WorkDetailClient({ work, remainingVotes: startingVotes, canVote, isOwner, activeVote }: WorkDetailClientProps) {
   const { message } = App.useApp();
   const [currentWork, setCurrentWork] = useState(work);
+  const [currentVote, setCurrentVote] = useState<Vote | null>(activeVote ?? null);
   const [count, setCount] = useState(1);
   const [remainingVotes, setRemainingVotes] = useState(startingVotes);
   const [pending, startVoteTransition] = useTransition();
@@ -37,9 +40,32 @@ export function WorkDetailClient({ work, remainingVotes: startingVotes, canVote,
         return;
       }
       setCurrentWork(payload.work);
+      setCurrentVote(payload.vote);
       setRemainingVotes(payload.remainingVotes);
       setCount(1);
       message.success(`成功投出 ${count} 票，剩余 ${payload.remainingVotes} 票`);
+    });
+  }
+
+  async function handleRevoke() {
+    if (!currentVote) {
+      return;
+    }
+    startVoteTransition(async () => {
+      const response = await fetch("/api/votes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voteId: currentVote.id })
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        message.error(payload.error || "撤回失败");
+        return;
+      }
+      setCurrentWork(payload.work);
+      setCurrentVote(null);
+      setRemainingVotes(payload.remainingVotes);
+      message.success(`已撤回 ${currentVote.count} 票，剩余 ${payload.remainingVotes} 票`);
     });
   }
 
@@ -96,13 +122,13 @@ export function WorkDetailClient({ work, remainingVotes: startingVotes, canVote,
               addonAfter="票"
             />
             <Button
-              type="primary"
+              type={currentVote ? "default" : "primary"}
               icon={<TrophyOutlined />}
               loading={pending}
-              disabled={!canVote || remainingVotes < 1}
-              onClick={handleVote}
+              disabled={!canVote || (!currentVote && remainingVotes < 1)}
+              onClick={currentVote ? handleRevoke : handleVote}
             >
-              确认投票
+              {currentVote ? `撤回 ${currentVote.count} 票` : "确认投票"}
             </Button>
           </Space>
           <Button icon={<CopyOutlined />} onClick={copyShareLink}>

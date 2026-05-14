@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getCurrentUser } from "@/lib/auth";
-import { castVotes } from "@/lib/store";
+import { castVotes, revokeVote } from "@/lib/store";
 
 const schema = z.object({
   workId: z.string().min(1),
@@ -16,9 +16,22 @@ export async function POST(request: Request) {
   }
   const body = schema.parse(await request.json());
   try {
-    const payload = castVotes({ voter: user, workId: body.workId, count: body.count });
+    const payload = await castVotes({ voter: user, workId: body.workId, count: body.count });
     return NextResponse.json(payload);
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "投票失败" }, { status: 400 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "未登录" }, { status: 401 });
+  }
+  const payload = z.object({ voteId: z.string().min(1) }).parse(await request.json());
+  try {
+    return NextResponse.json(await revokeVote({ voter: user, voteId: payload.voteId }));
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "撤回失败" }, { status: 400 });
   }
 }

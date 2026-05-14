@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       if (!employeeNo || !displayName) {
         continue;
       }
-      const existing = getUserByEmployeeNo(employeeNo);
+      const existing = await getUserByEmployeeNo(employeeNo);
       const patch = {
         displayName,
         voteQuota: voteQuota ? Number(voteQuota) : null,
@@ -48,10 +48,10 @@ export async function POST(request: Request) {
         canVote: parseBoolean(canVote, true)
       };
       if (existing) {
-        updateUserConfig(existing.id, patch);
+        await updateUserConfig(existing.id, patch);
         updated += 1;
       } else {
-        createUser({
+        await createUser({
           employeeNo,
           accessCode: accessCode || "demo123",
           ...patch

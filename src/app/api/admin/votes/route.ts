@@ -8,5 +8,5 @@ export async function GET() {
   if (!user || user.role !== "admin") {
     return NextResponse.json({ error: "没有权限" }, { status: 403 });
   }
-  return NextResponse.json({ votes: listVotes() });
+  return NextResponse.json({ votes: await listVotes() });
 }

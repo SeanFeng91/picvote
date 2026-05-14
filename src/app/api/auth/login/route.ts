@@ -13,7 +13,7 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   const payload = schema.parse(await request.json());
-  const user = authenticate(payload.employeeNo, payload.accessCode);
+  const user = await authenticate(payload.employeeNo, payload.accessCode);
   if (!user) {
     return NextResponse.json({ error: "工号或口令不正确" }, { status: 401 });
   }
@@ -24,6 +24,6 @@ export async function POST(request: Request) {
   await setSessionCookie({ userId: user.id, role: user.role });
   return NextResponse.json({
     ok: true,
-    redirectTo: payload.returnTo || (payload.intent === "admin" ? "/admin" : user.role === "admin" ? "/admin" : "/")
+    redirectTo: payload.returnTo || (user.role === "admin" ? "/admin" : "/")
   });
 }

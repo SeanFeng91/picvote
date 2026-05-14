@@ -18,7 +18,7 @@ export async function GET() {
   if (!user || user.role !== "admin") {
     return NextResponse.json({ error: "没有权限" }, { status: 403 });
   }
-  return NextResponse.json({ users: listUsers() });
+  return NextResponse.json({ users: await listUsers() });
 }
 
 export async function POST(request: Request) {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   }
   try {
     const payload = createSchema.parse(await request.json());
-    const created = createUser(payload);
+    const created = await createUser(payload);
     return NextResponse.json({ ok: true, user: created });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "创建失败" }, { status: 400 });

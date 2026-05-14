@@ -13,7 +13,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "未登录" }, { status: 401 });
   }
   try {
-    const work = deleteWork({ actor: user, workId: id });
+    const work = await deleteWork({ actor: user, workId: id });
     await removeUploadedFile(work.mediaUrl);
     return NextResponse.json({ ok: true, work });
   } catch (error) {

@@ -19,7 +19,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
   try {
     const payload = patchSchema.parse(await request.json());
-    const updated = updateUserConfig(id, payload);
+    const updated = await updateUserConfig(id, payload);
     return NextResponse.json({ ok: true, user: updated });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "更新失败" }, { status: 400 });

@@ -18,6 +18,7 @@ import {
   CameraOutlined,
   HomeOutlined,
   PictureOutlined,
+  RollbackOutlined,
   SearchOutlined,
   TrophyOutlined,
   UploadOutlined,
@@ -27,13 +28,14 @@ import Link from "next/link";
 import { startTransition, useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
 
 import { Work } from "@/lib/types";
+import type { Vote } from "@/lib/types";
 
 type GalleryClientProps = {
   initialWorks: Work[];
   initialRemainingVotes: number;
   canVote: boolean;
   currentWork?: Work | null;
-  votedWorkIds?: string[];
+  initialVotes?: Vote[];
   compactHome?: boolean;
 };
 
@@ -44,7 +46,7 @@ export function GalleryClient({
   initialRemainingVotes,
   canVote,
   currentWork,
-  votedWorkIds = [],
+  initialVotes = [],
   compactHome = false
 }: GalleryClientProps) {
   const { message } = App.useApp();
@@ -53,7 +55,7 @@ export function GalleryClient({
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [selectedId, setSelectedId] = useState(initialWorks[0]?.id ?? "");
-  const [votedIds, setVotedIds] = useState(() => new Set(votedWorkIds));
+  const [myVotes, setMyVotes] = useState(initialVotes);
   const [pending, startVoteTransition] = useTransition();
   const deferredSearch = useDeferredValue(search);
 
@@ -74,7 +76,14 @@ export function GalleryClient({
     return () => window.clearInterval(timer);
   }, []);
 
-  const votedIdSet = useMemo(() => votedIds, [votedIds]);
+  const activeVotes = useMemo(() => myVotes.filter((vote) => vote.status === "valid"), [myVotes]);
+  const voteByWorkId = useMemo(() => {
+    const map = new Map<string, Vote>();
+    for (const vote of activeVotes) {
+      map.set(vote.workId, vote);
+    }
+    return map;
+  }, [activeVotes]);
   const filteredWorks = useMemo(() => {
     const keyword = deferredSearch.trim().toLowerCase();
     return works.filter((work) => {
@@ -84,10 +93,10 @@ export function GalleryClient({
       const matchesFilter =
         filter === "all" ||
         work.mediaType === filter ||
-        (filter === "voted" && votedIdSet.has(work.id));
+        (filter === "voted" && voteByWorkId.has(work.id));
       return matchesSearch && matchesFilter;
     });
-  }, [deferredSearch, filter, votedIdSet, works]);
+  }, [deferredSearch, filter, voteByWorkId, works]);
 
   const selectedWork = works.find((work) => work.id === selectedId) ?? filteredWorks[0] ?? works[0] ?? null;
   const totalVotes = works.reduce((sum, work) => sum + work.voteCountCache, 0);
@@ -109,13 +118,40 @@ export function GalleryClient({
         return;
       }
       setRemainingVotes(payload.remainingVotes);
-      setVotedIds((current) => new Set([...current, work.id]));
+      setMyVotes((current) => [payload.vote, ...current.filter((vote) => vote.id !== payload.vote.id)]);
       setWorks((current) =>
         current.map((item) =>
           item.id === payload.work.id ? { ...item, voteCountCache: payload.work.voteCountCache } : item
         )
       );
       message.success(`已投出 ${count} 票，剩余 ${payload.remainingVotes} 票`);
+    });
+  }
+
+  async function revoke(work: Work) {
+    const vote = voteByWorkId.get(work.id);
+    if (!vote) {
+      return;
+    }
+    startVoteTransition(async () => {
+      const response = await fetch("/api/votes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voteId: vote.id })
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        message.error(payload.error || "撤回失败");
+        return;
+      }
+      setRemainingVotes(payload.remainingVotes);
+      setMyVotes((current) => current.map((item) => (item.id === vote.id ? payload.vote : item)));
+      setWorks((current) =>
+        current.map((item) =>
+          item.id === payload.work.id ? { ...item, voteCountCache: payload.work.voteCountCache } : item
+        )
+      );
+      message.success(`已撤回 ${vote.count} 票，剩余 ${payload.remainingVotes} 票`);
     });
   }
 
@@ -204,16 +240,20 @@ export function GalleryClient({
                 <div className="tile-vote">
                   <Button
                     size="small"
-                    type={votedIdSet.has(work.id) ? "default" : "primary"}
+                    type={voteByWorkId.has(work.id) ? "default" : "primary"}
                     shape="circle"
                     loading={pending}
-                    disabled={!canVote || remainingVotes < 1}
+                    disabled={!canVote || (!voteByWorkId.has(work.id) && remainingVotes < 1)}
                     onClick={(event) => {
                       event.stopPropagation();
-                      quickVote(work);
+                      if (voteByWorkId.has(work.id)) {
+                        revoke(work);
+                      } else {
+                        quickVote(work);
+                      }
                     }}
                   >
-                    ↑
+                    {voteByWorkId.has(work.id) ? <RollbackOutlined /> : <TrophyOutlined />}
                   </Button>
                 </div>
                 <div className="tile-shade">
@@ -276,13 +316,13 @@ export function GalleryClient({
               </div>
               <Space wrap>
                 <Button
-                  type="primary"
+                  type={voteByWorkId.has(selectedWork.id) ? "default" : "primary"}
                   icon={<TrophyOutlined />}
                   loading={pending}
-                  disabled={!canVote || remainingVotes < 1}
-                  onClick={() => quickVote(selectedWork)}
+                  disabled={!canVote || (!voteByWorkId.has(selectedWork.id) && remainingVotes < 1)}
+                  onClick={() => (voteByWorkId.has(selectedWork.id) ? revoke(selectedWork) : quickVote(selectedWork))}
                 >
-                  投 1 票
+                  {voteByWorkId.has(selectedWork.id) ? `撤回 ${voteByWorkId.get(selectedWork.id)?.count ?? 1} 票` : "投 1 票"}
                 </Button>
                 <Link href={`/share/${selectedWork.code}`}>
                   <Button>分享页</Button>

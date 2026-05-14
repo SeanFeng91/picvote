@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
-import { recordUploadPart } from "@/lib/store";
+import { getUploadSession, recordUploadPart } from "@/lib/store";
 import { saveUploadPart } from "@/lib/storage";
 
 export const runtime = "nodejs";
@@ -22,9 +22,13 @@ export async function PUT(
   }
 
   try {
+    const currentSession = await getUploadSession(uploadId);
+    if (!currentSession || currentSession.ownerUserId !== user.id) {
+      return NextResponse.json({ error: "上传会话不存在" }, { status: 404 });
+    }
     const bytes = Buffer.from(await request.arrayBuffer());
-    const saved = await saveUploadPart(uploadId, partNumber, bytes);
-    const session = recordUploadPart({
+    const saved = await saveUploadPart(currentSession, partNumber, bytes);
+    const session = await recordUploadPart({
       actor: user,
       uploadId,
       partNumber,

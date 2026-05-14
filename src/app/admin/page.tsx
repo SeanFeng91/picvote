@@ -7,7 +7,7 @@ import { getAdminSummary } from "@/lib/store";
 
 export default async function AdminPage() {
   await requireAdminPage("/admin");
-  const summary = getAdminSummary();
+  const summary = await getAdminSummary();
 
   return (
     <div className="page-shell stack">
@@ -23,7 +23,7 @@ export default async function AdminPage() {
           <Link href="/display" className="button-secondary">
             展示页
           </Link>
-          <LogoutButton redirectTo="/admin/login" />
+          <LogoutButton redirectTo="/login?returnTo=%2F" />
         </div>
       </div>
       <AdminDashboardClient summary={summary} />

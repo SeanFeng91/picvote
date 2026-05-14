@@ -1,6 +1,8 @@
 "use client";
 
-import { Image, Segmented, Space, Typography } from "antd";
+import { Button, Image, Segmented, Space, Typography } from "antd";
+import { ArrowLeftOutlined, AppstoreOutlined, TrophyOutlined } from "@ant-design/icons";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { Work } from "@/lib/types";
@@ -62,12 +64,15 @@ export function DisplayBoard({ initialMode, initialWorks, showPublicVotes }: Dis
           </div>
         </div>
         <Space>
+          <Link href="/admin">
+            <Button icon={<ArrowLeftOutlined />}>后台</Button>
+          </Link>
           <Segmented
             value={mode}
             onChange={(value) => setMode(value as "wall" | "ranking")}
             options={[
-              { label: "作品墙", value: "wall" },
-              { label: "排行榜", value: "ranking" }
+              { label: "作品墙", value: "wall", icon: <AppstoreOutlined /> },
+              { label: "排行榜", value: "ranking", icon: <TrophyOutlined /> }
             ]}
           />
         </Space>

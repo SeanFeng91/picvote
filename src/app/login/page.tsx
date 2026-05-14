@@ -15,8 +15,8 @@ export default async function LoginPage({
   }
   return (
     <LoginForm
-      title="参与者登录"
-      subtitle="用工号和登录口令进入上传、相册、投票和分享页。"
+      title="统一登录"
+      subtitle="用工号和登录口令进入系统；管理员登录后会进入后台，参与者进入相册。"
       intent="user"
       returnTo={params.returnTo}
     />

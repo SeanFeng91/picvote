@@ -1,6 +1,7 @@
 node_modules
 .next
 .open-next
+.wrangler
 data/store.json
 data/upload-sessions
 public/uploads

@@ -7,11 +7,12 @@ export default async function DisplayPage({
   searchParams: Promise<{ mode?: "wall" | "ranking" }>;
 }) {
   const params = await searchParams;
+  const [works, activity] = await Promise.all([listWorks(false), getActivity()]);
   return (
     <DisplayBoard
       initialMode={params.mode || "wall"}
-      initialWorks={listWorks(false)}
-      showPublicVotes={getActivity().showPublicVotes}
+      initialWorks={works}
+      showPublicVotes={activity.showPublicVotes}
     />
   );
 }

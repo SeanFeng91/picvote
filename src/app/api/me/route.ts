@@ -8,9 +8,10 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ error: "未登录" }, { status: 401 });
   }
+  const [currentWork, remainingVotes] = await Promise.all([getWorkForUser(user.id), remainingVotesForUser(user.id)]);
   return NextResponse.json({
     user,
-    currentWork: getWorkForUser(user.id),
-    remainingVotes: remainingVotesForUser(user.id)
+    currentWork,
+    remainingVotes
   });
 }

@@ -8,11 +8,11 @@ import { useState } from "react";
 type LoginFormProps = {
   title: string;
   subtitle: string;
-  intent: "user" | "admin";
+  intent?: "user" | "admin";
   returnTo?: string;
 };
 
-export function LoginForm({ title, subtitle, intent, returnTo }: LoginFormProps) {
+export function LoginForm({ title, subtitle, intent = "user", returnTo }: LoginFormProps) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -55,11 +55,7 @@ export function LoginForm({ title, subtitle, intent, returnTo }: LoginFormProps)
             <Form.Item name="employeeNo" label="工号" rules={[{ required: true, message: "请输入工号" }]}>
               <Input inputMode="numeric" prefix={<NumberOutlined />} placeholder="请输入活动工号" autoComplete="username" />
             </Form.Item>
-            <Form.Item
-              name="accessCode"
-              label={intent === "admin" ? "管理员口令" : "活动口令"}
-              rules={[{ required: true, message: "请输入口令" }]}
-            >
+            <Form.Item name="accessCode" label="登录口令" rules={[{ required: true, message: "请输入口令" }]}>
               <Input.Password prefix={<LockOutlined />} placeholder="请输入登录口令" autoComplete="current-password" />
             </Form.Item>
             <Button type="primary" htmlType="submit" block loading={pending}>

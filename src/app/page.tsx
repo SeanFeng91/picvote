@@ -7,9 +7,13 @@ import { getActivity, getWorkForUser, listVotesForUser, listWorks, remainingVote
 
 export default async function HomePage() {
   const user = await requireUserPage("/");
-  const activity = getActivity();
-  const currentWork = getWorkForUser(user.id);
-  const votes = listVotesForUser(user.id);
+  const [activity, currentWork, votes, works, remainingVotes] = await Promise.all([
+    getActivity(),
+    getWorkForUser(user.id),
+    listVotesForUser(user.id),
+    listWorks(false),
+    remainingVotesForUser(user.id)
+  ]);
 
   return (
     <div className="page-shell stack">
@@ -30,11 +34,11 @@ export default async function HomePage() {
       </div>
       <GalleryClient
         compactHome
-        initialWorks={listWorks(false)}
-        initialRemainingVotes={remainingVotesForUser(user.id)}
+        initialWorks={works}
+        initialRemainingVotes={remainingVotes}
         canVote={user.canVote}
         currentWork={currentWork}
-        votedWorkIds={votes.filter((vote) => vote.status === "valid").map((vote) => vote.workId)}
+        initialVotes={votes}
       />
     </div>
   );

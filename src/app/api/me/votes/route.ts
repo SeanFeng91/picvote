@@ -8,5 +8,5 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ error: "未登录" }, { status: 401 });
   }
-  return NextResponse.json({ votes: listVotesForUser(user.id) });
+  return NextResponse.json({ votes: await listVotesForUser(user.id) });
 }

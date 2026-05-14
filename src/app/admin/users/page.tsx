@@ -7,6 +7,7 @@ import { listUsers } from "@/lib/store";
 
 export default async function AdminUsersPage() {
   await requireAdminPage("/admin/users");
+  const users = await listUsers();
   return (
     <div className="page-shell stack">
       <div className="topbar">
@@ -18,10 +19,10 @@ export default async function AdminUsersPage() {
           <Link href="/admin" className="button-secondary">
             返回后台
           </Link>
-          <LogoutButton redirectTo="/admin/login" />
+          <LogoutButton redirectTo="/login?returnTo=%2F" />
         </div>
       </div>
-      <AdminUsersClient initialUsers={listUsers()} />
+      <AdminUsersClient initialUsers={users} />
     </div>
   );
 }

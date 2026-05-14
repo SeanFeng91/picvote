@@ -16,5 +16,5 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "没有权限" }, { status: 403 });
   }
   const payload = schema.parse(await request.json());
-  return NextResponse.json({ ok: true, activity: updateActivityConfig(payload) });
+  return NextResponse.json({ ok: true, activity: await updateActivityConfig(payload) });
 }
